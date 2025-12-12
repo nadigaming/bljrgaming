@@ -1,318 +1,444 @@
 <!doctype html>
 <!--
-  Modern, accessible, responsive single-file website template
-  - HTML5, semantic markup
-  - CSS variables, responsive grid/flex layout
-  - Mobile-first, accessible (contrast, ARIA, focus states)
-  - Light/Dark theme toggle, simple JS interactions
-  - Sections: nav, hero, features, about, projects, contact, footer
-  - Ready to customize: replace text, images, colors, icons
+  Online Shop — Single-file front-end template
+  - HTML/CSS/JS (vanilla)
+  - Product grid, search, category filter, sort
+  - Shopping cart with localStorage persistence
+  - Simple checkout simulation (no real payments)
+  - Accessible, responsive, ready to plug into an API
+  - Save as `index.html` and open in browser
 -->
 <html lang="id">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Template website modern, cepat, dan responsif—siap dipakai untuk portofolio, company, atau landing page.">
-  <title>Website Modern — Template</title>
+  <meta name="description" content="Template toko online sederhana: daftar produk, keranjang, checkout simulasi, responsive & accessible">
+  <title>Toko Online — Template</title>
 
-  <!-- Favicon (replace with your own) -->
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-
-  <!-- Basic styles -->
   <style>
     :root{
-      --bg: #0f1724;
-      --card:#0b1220;
-      --muted:#9aa4b2;
-      --text:#e6eef8;
-      --accent:#4f46e5;
-      --glass: rgba(255,255,255,0.03);
-      --radius: 12px;
-      --max-width: 1100px;
-      --container-padding: 1rem;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-      line-height:1.45;
-    }
-
-    /* Light theme overrides */
-    :root[data-theme='light']{
-      --bg: #f7fafc;
+      --bg:#f6f8fb;
       --card:#ffffff;
-      --muted:#556277;
+      --muted:#6b7280;
       --text:#0b1220;
-      --accent:#2563eb;
-      --glass: rgba(11,18,32,0.04);
+      --accent:#ef4444;
+      --accent-2:#2563eb;
+      --radius:12px;
+      --container:1100px;
+      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     }
-
-    /* Reset & base */
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:linear-gradient(180deg,var(--bg),rgba(0,0,0,0.03));
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding:2rem 0;
-      display:flex;justify-content:center;
-    }
+    body{margin:0;background:var(--bg);color:var(--text);padding:1.25rem;display:flex;justify-content:center}
+    .wrap{width:100%;max-width:var(--container)}
 
-    .wrap{
-      width:100%;
-      max-width:var(--max-width);
-      padding:0 var(--container-padding);
-    }
-
-    header{
-      display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0;
-    }
-
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem}
     .brand{display:flex;gap:0.75rem;align-items:center;text-decoration:none;color:inherit}
-    .logo{
-      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:inline-grid;place-items:center;font-weight:700;color:white;font-size:18px
-    }
-
-    nav ul{display:flex;gap:0.6rem;list-style:none;margin:0;padding:0}
-    nav a{color:var(--muted);text-decoration:none;padding:0.45rem 0.6rem;border-radius:8px}
-    nav a:hover, nav a:focus{background:var(--glass);color:var(--text);outline:none}
-
-    .btn{background:var(--accent);color:white;padding:0.5rem 0.8rem;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block}
-    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:0.45rem 0.7rem;border-radius:10px}
-
-    /* Hero */
-    .hero{
-      display:grid;gap:1.2rem;grid-template-columns:1fr;align-items:center;padding:2rem 0;
-    }
-    .hero-grid{display:grid;gap:1.2rem}
-    .hero h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:0}
-    .hero p{color:var(--muted);margin:0.6rem 0 0}
-
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-      border-radius:var(--radius);
-      padding:1rem;
-      box-shadow: 0 6px 20px rgba(2,6,23,0.45);
-    }
-
-    /* Features */
-    .grid{display:grid;gap:1rem}
-    .features{grid-template-columns:repeat(1,1fr)}
-
-    .feature{padding:1rem;border-radius:12px;background:var(--card);}
-    .feature h3{margin:0 0 0.5rem}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#fb7185);display:inline-grid;place-items:center;color:white;font-weight:700}
+    h1{font-size:1.15rem;margin:0}
     .muted{color:var(--muted)}
 
-    /* Projects */
-    .projects{display:grid;grid-template-columns:1fr;gap:1rem}
-    .project{display:flex;gap:1rem;align-items:center;padding:0.9rem;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,0.04),transparent)}
-    .project-img{width:92px;height:64px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#7c3aed);flex-shrink:0}
+    /* Top controls */
+    .controls{display:flex;gap:0.5rem;align-items:center;margin-top:0.75rem}
+    .search{flex:1;display:flex}
+    .search input{flex:1;padding:0.55rem;border-radius:10px 0 0 10px;border:1px solid rgba(0,0,0,0.06)}
+    .search button{padding:0.55rem 0.8rem;border-radius:0 10px 10px 0;border:1px solid rgba(0,0,0,0.06);background:var(--accent-2);color:white}
 
-    /* Contact */
-    form{display:grid;gap:0.7rem}
-    input,textarea,button{font:inherit}
-    input,textarea{padding:0.7rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
-    input:focus,textarea:focus{outline:2px solid rgba(79,70,229,0.28)}
+    .layout{display:grid;grid-template-columns:260px 1fr 360px;gap:1rem;margin-top:1rem}
 
-    footer{padding:2rem 0;color:var(--muted);font-size:0.95rem}
+    /* Sidebar (filters) */
+    .sidebar .card, .main .card, .cart .card{background:var(--card);padding:1rem;border-radius:var(--radius);box-shadow:0 6px 18px rgba(11,18,24,0.06)}
+    .sidebar h3{margin-top:0}
+    .categories{display:flex;flex-direction:column;gap:0.4rem}
+    .category{padding:0.45rem;border-radius:8px;text-decoration:none;color:var(--muted)}
+    .category.active{background:rgba(37,99,235,0.08);color:var(--accent-2)}
 
-    /* Responsive */
-    @media(min-width:768px){
-      .hero{grid-template-columns:1fr 420px}
-      .features{grid-template-columns:repeat(3,1fr)}
-      .projects{grid-template-columns:repeat(2,1fr)}
+    /* Product list */
+    .main{min-height:60vh}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem}
+    .grid{display:grid;grid-template-columns:repeat(1,1fr);gap:0.9rem}
+    .product{display:flex;gap:0.9rem;align-items:stretch;padding:0.9rem;border-radius:12px}
+    .product .img{width:140px;height:100px;border-radius:8px;background:linear-gradient(135deg,var(--accent-2),#60a5fa);flex-shrink:0}
+    .product .info{flex:1}
+    .price{font-weight:700}
+    .p-muted{color:var(--muted);font-size:0.95rem}
+    .btn{background:var(--accent);color:white;padding:0.5rem 0.7rem;border-radius:10px;border:none;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+
+    /* Cart */
+    .cart h3{margin-top:0}
+    .cart-items{display:flex;flex-direction:column;gap:0.6rem;margin-top:0.6rem}
+    .cart-item{display:flex;gap:0.6rem;align-items:center}
+    .cart-item .thumb{width:56px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#fb7185)}
+    .qty{display:flex;align-items:center;gap:0.4rem}
+    .qty button{padding:0.2rem 0.5rem;border-radius:6px;border:1px solid rgba(0,0,0,0.06);background:transparent}
+
+    .summary{margin-top:1rem;padding-top:0.6rem;border-top:1px dashed rgba(0,0,0,0.06)}
+
+    /* Footer */
+    footer{margin-top:1rem;text-align:center;color:var(--muted)}
+
+    @media(min-width:900px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(min-width:1200px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+      .layout{grid-template-columns:220px 1fr 360px}
+      .product{flex-direction:column}
+      .product .img{width:100%;height:140px}
     }
 
-    /* small utilities */
-    .stack{display:flex;gap:0.6rem;flex-wrap:wrap}
-    .tag{padding:0.25rem 0.5rem;border-radius:999px;background:var(--glass);font-size:0.82rem}
-
-    /* a11y focus */
-    a:focus,button:focus,input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(79,70,229,0.18);outline:none}
+    /* small helpers */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
   </style>
 </head>
 <body>
-  <div class="wrap" id="page">
+  <div class="wrap">
     <header>
       <a class="brand" href="#home">
-        <span class="logo" aria-hidden>WM</span>
+        <div class="logo">TS</div>
         <div>
-          <strong>WebModern</strong>
-          <div class="muted" style="font-size:12px">Template siap pakai</div>
+          <h1>TokoSampel</h1>
+          <div class="muted">Toko online sederhana — template</div>
         </div>
       </a>
 
-      <nav aria-label="Main navigation">
-        <ul>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#projects">Projects</a></li>
-          <li><a href="#contact">Contact</a></li>
-          <li><button id="themeToggle" class="ghost" aria-pressed="false">Light</button></li>
-        </ul>
-      </nav>
+      <div style="display:flex;gap:0.6rem;align-items:center">
+        <div class="muted">Gratis ongkir di atas Rp200.000</div>
+        <button id="openCartBtn" class="btn" aria-haspopup="dialog">Keranjang (<span id="cartCount">0</span>)</button>
+      </div>
     </header>
 
-    <main>
-      <section class="hero card" id="home">
-        <div class="hero-grid">
-          <div>
-            <h1>Membangun website yang rapi, cepat & dapat diakses</h1>
-            <p class="muted">Template ini menggunakan praktik terbaik modern: mobile-first, semantic HTML, performance-minded CSS, dan interaksi JS sederhana. Cocok untuk portofolio, startup, atau landing page.</p>
-
-            <div style="margin-top:1rem" class="stack">
-              <a class="btn" href="#contact">Hubungi Kami</a>
-              <a class="ghost" href="#projects">Lihat Project</a>
-            </div>
-
-            <div style="margin-top:1rem">
-              <span class="tag">HTML</span>
-              <span class="tag">CSS</span>
-              <span class="tag">JS</span>
-              <span class="tag">A11y</span>
-            </div>
-          </div>
-
-          <aside class="card" aria-labelledby="why">
-            <h2 id="why" style="margin-top:0">Kenapa pakai template ini?</h2>
-            <ul class="muted">
-              <li>Ringan & mudah dikustom</li>
-              <li>Siap responsif untuk mobile & desktop</li>
-              <li>Fokus pada aksesibilitas dan pengalaman pengguna</li>
-            </ul>
-          </aside>
-        </div>
-      </section>
-
-      <section id="features" style="margin-top:1.5rem">
-        <h2>Features</h2>
-        <div class="grid features" style="margin-top:0.8rem">
-          <article class="feature">
-            <h3>Desain Modern</h3>
-            <p class="muted">Tipografi bersih dan layout yang rapi membuat konten terlihat profesional.</p>
-          </article>
-
-          <article class="feature">
-            <h3>Performance</h3>
-            <p class="muted">CSS minimal dan JavaScript ringan untuk waktu muat cepat.</p>
-          </article>
-
-          <article class="feature">
-            <h3>Aksesibilitas</h3>
-            <p class="muted">Elemen fokus, label form jelas, dan kontras warna yang baik.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="projects" style="margin-top:1.5rem">
-        <h2>Projects</h2>
-        <div class="projects" style="margin-top:0.8rem">
-          <div class="project card">
-            <div class="project-img" aria-hidden></div>
-            <div>
-              <strong>Project A</strong>
-              <div class="muted">Sebuah landing page produk cepat dan responsive.</div>
-            </div>
-          </div>
-
-          <div class="project card">
-            <div class="project-img" aria-hidden></div>
-            <div>
-              <strong>Project B</strong>
-              <div class="muted">Website portofolio dengan fokus pada performa.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" style="margin-top:1.5rem">
-        <h2>Contact</h2>
-        <div class="card" style="margin-top:0.8rem;display:grid;grid-template-columns:1fr;gap:1rem">
-          <form id="contactForm" novalidate>
-            <label for="name">Nama</label>
-            <input id="name" name="name" type="text" required placeholder="Nama kamu">
-
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required placeholder="email@domain.com">
-
-            <label for="message">Pesan</label>
-            <textarea id="message" name="message" rows="5" placeholder="Tulis pesan..." required></textarea>
-
-            <button type="submit" class="btn">Kirim</button>
-            <div id="formStatus" class="muted" aria-live="polite" style="margin-top:0.6rem"></div>
-          </form>
-        </div>
-      </section>
-
-    </main>
-
-    <footer style="margin-top:2rem">
-      <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
-        <div>
-          <strong>WebModern</strong>
-          <div class="muted">© <span id="year"></span> — Built with care</div>
-        </div>
-        <div class="muted">Made for you — accessible & fast</div>
+    <div class="controls">
+      <div class="search" role="search">
+        <input id="searchInput" type="search" placeholder="Cari produk..." aria-label="Cari produk">
+        <button id="searchBtn" aria-label="Cari">Cari</button>
       </div>
+
+      <select id="sortSelect" aria-label="Urutkan" style="padding:0.5rem;border-radius:10px;border:1px solid rgba(0,0,0,0.06)">
+        <option value="default">Urutkan: Relevansi</option>
+        <option value="price-asc">Harga: Rendah ke Tinggi</option>
+        <option value="price-desc">Harga: Tinggi ke Rendah</option>
+        <option value="name-asc">Nama: A–Z</option>
+      </select>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="card">
+          <h3>Kategori</h3>
+          <nav class="categories" aria-label="Kategori produk">
+            <a href="#" class="category active" data-cat="all">Semua</a>
+            <a href="#" class="category" data-cat="electronics">Elektronik</a>
+            <a href="#" class="category" data-cat="fashion">Fashion</a>
+            <a href="#" class="category" data-cat="home">Rumah</a>
+            <a href="#" class="category" data-cat="beauty">Kecantikan</a>
+          </nav>
+        </div>
+
+        <div class="card" style="margin-top:0.8rem">
+          <h3>Filter Harga</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <input id="minPrice" type="number" placeholder="Min" style="flex:1;padding:0.5rem;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+            <input id="maxPrice" type="number" placeholder="Max" style="flex:1;padding:0.5rem;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+            <button id="priceFilterBtn" class="btn">Apply</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="card">
+          <div class="toolbar">
+            <div>
+              <strong id="resultCount">0</strong> produk ditemukan
+            </div>
+            <div class="muted">Menampilkan produk populer</div>
+          </div>
+
+          <div id="productGrid" class="grid" role="list"></div>
+        </div>
+      </main>
+
+      <aside class="cart">
+        <div class="card">
+          <h3>Ringkasan Keranjang</h3>
+          <div id="cartPreview" class="cart-items" aria-live="polite"></div>
+
+          <div class="summary">
+            <div class="muted">Subtotal: <strong id="subtotal">Rp0</strong></div>
+            <div style="margin-top:0.6rem;display:flex;gap:0.5rem">
+              <button id="viewCartFull" class="btn">Lihat & Checkout</button>
+              <button id="clearCartBtn" class="btn ghost">Kosongkan</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div class="muted">Template toko online — Simulasi frontend. Tidak untuk produksi tanpa backend.</div>
     </footer>
   </div>
 
-  <!-- JavaScript (keperluan interaksi ringan) -->
+  <!-- Modal / Drawer untuk checkout sederhana -->
+  <dialog id="cartDialog" style="width:min(900px,95%);border-radius:12px;padding:0;border:none">
+    <form method="dialog" style="display:flex;flex-direction:column;gap:0">
+      <header style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:var(--card);border-top-left-radius:12px;border-top-right-radius:12px">
+        <h3 style="margin:0">Keranjang — Checkout</h3>
+        <button id="closeCart" class="btn ghost">Tutup</button>
+      </header>
+
+      <div style="padding:1rem;max-height:60vh;overflow:auto;display:grid;grid-template-columns:1fr 320px;gap:1rem;background:var(--bg)">
+        <div>
+          <div id="fullCartItems" style="display:flex;flex-direction:column;gap:0.6rem"></div>
+        </div>
+        <aside style="position:relative">
+          <div style="background:var(--card);padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(11,18,24,0.06)">
+            <div class="muted">Ringkasan</div>
+            <div style="margin-top:0.6rem">Subtotal: <strong id="dialogSubtotal">Rp0</strong></div>
+            <div style="margin-top:0.6rem">Ongkir: <strong id="shipping">Rp0</strong></div>
+            <div style="margin-top:0.6rem">Total: <strong id="dialogTotal">Rp0</strong></div>
+
+            <hr style="margin:0.8rem 0;border:none;border-top:1px dashed rgba(0,0,0,0.06)">
+            <label for="nameField">Nama</label>
+            <input id="nameField" required placeholder="Nama penerima" style="width:100%;padding:0.5rem;border-radius:8px;border:1px solid rgba(0,0,0,0.06)">
+            <label for="addressField" style="margin-top:0.6rem">Alamat</label>
+            <textarea id="addressField" rows="4" placeholder="Alamat lengkap" style="width:100%;padding:0.5rem;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"></textarea>
+            <button id="confirmBtn" class="btn" style="margin-top:0.6rem;width:100%">Konfirmasi & Bayar (Simulasi)</button>
+          </div>
+        </aside>
+      </div>
+    </form>
+  </dialog>
+
   <script>
     (function(){
-      // set year
-      document.getElementById('year').textContent = new Date().getFullYear();
+      // Sample product data (replace with API data if available)
+      const products = [
+        {id:1,name:'Kipas Angin Portable',price:129000,category:'home',desc:'Kipas kecil, USB, cocok untuk meja'},
+        {id:2,name:'Kaos Polos Hitam',price:89000,category:'fashion',desc:'Cotton nyaman sehari-hari'},
+        {id:3,name:'Headset Bluetooth',price:249000,category:'electronics',desc:'Suara jernih, mic terintegrasi'},
+        {id:4,name:'Lampu Meja LED',price:159000,category:'home',desc:'Dimming, hemat energi'},
+        {id:5,name:'Serum Wajah 30ml',price:139000,category:'beauty',desc:'Untuk kulit lembab bercahaya'},
+        {id:6,name:'Sneakers Kasual',price:359000,category:'fashion',desc:'Ringan & stylish'},
+        {id:7,name:'Powerbank 10000mAh',price:179000,category:'electronics',desc:'Cepat isi ulang, aman'},
+        {id:8,name:'Set Gelas Minum 4pcs',price:99000,category:'home',desc:'Kaca tempered, tahan panas'},
+        {id:9,name:'Lipstik Matte',price:79000,category:'beauty',desc:'Tahan lama & lembap'},
+      ];
 
-      // Theme toggle
-      const themeToggle = document.getElementById('themeToggle');
-      const root = document.documentElement;
-      const preferred = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-      root.setAttribute('data-theme', preferred);
-      themeToggle.textContent = preferred === 'light' ? 'Light' : 'Dark';
-      themeToggle.setAttribute('aria-pressed', preferred === 'light');
+      // Utilities
+      const fmt = (n)=> 'Rp' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-      themeToggle.addEventListener('click', () => {
-        const now = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        root.setAttribute('data-theme', now);
-        localStorage.setItem('theme', now);
-        themeToggle.textContent = now === 'light' ? 'Light' : 'Dark';
-        themeToggle.setAttribute('aria-pressed', now === 'light');
-      });
+      // State
+      let state = {
+        products: products.slice(),
+        query: '',
+        category: 'all',
+        sort: 'default',
+        minPrice: null,
+        maxPrice: null,
+        cart: JSON.parse(localStorage.getItem('cart_v1')||'{}') // { productId: qty }
+      };
 
-      // Simple accessible form handling (no server) — replace with your API call
-      const form = document.getElementById('contactForm');
-      const status = document.getElementById('formStatus');
+      // Elements
+      const productGrid = document.getElementById('productGrid');
+      const resultCount = document.getElementById('resultCount');
+      const cartCount = document.getElementById('cartCount');
+      const cartPreview = document.getElementById('cartPreview');
+      const subtotalEl = document.getElementById('subtotal');
+      const dialogSubtotal = document.getElementById('dialogSubtotal');
+      const dialogTotal = document.getElementById('dialogTotal');
+      const shippingEl = document.getElementById('shipping');
+      const fullCartItems = document.getElementById('fullCartItems');
+      const openCartBtn = document.getElementById('openCartBtn');
+      const cartDialog = document.getElementById('cartDialog');
+      const viewCartFull = document.getElementById('viewCartFull');
+      const clearCartBtn = document.getElementById('clearCartBtn');
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+      const sortSelect = document.getElementById('sortSelect');
+      const categories = document.querySelectorAll('.category');
+      const minPriceInput = document.getElementById('minPrice');
+      const maxPriceInput = document.getElementById('maxPrice');
+      const priceFilterBtn = document.getElementById('priceFilterBtn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const nameField = document.getElementById('nameField');
+      const addressField = document.getElementById('addressField');
 
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // Basic client-side validation
-        const name = form.name.value.trim();
-        const email = form.email.value.trim();
-        const message = form.message.value.trim();
-        if(!name || !email || !message){
-          status.textContent = 'Mohon lengkapi semua field.';
-          return;
-        }
+      // Render functions
+      function filterAndSort(){
+        let list = state.products.slice();
+        if(state.category !== 'all') list = list.filter(p=>p.category===state.category);
+        if(state.query) list = list.filter(p=> (p.name + ' ' + p.desc).toLowerCase().includes(state.query.toLowerCase()));
+        if(state.minPrice!=null) list = list.filter(p=>p.price >= state.minPrice);
+        if(state.maxPrice!=null) list = list.filter(p=>p.price <= state.maxPrice);
+        if(state.sort === 'price-asc') list.sort((a,b)=>a.price-b.price);
+        if(state.sort === 'price-desc') list.sort((a,b)=>b.price-a.price);
+        if(state.sort === 'name-asc') list.sort((a,b)=>a.name.localeCompare(b.name));
+        return list;
+      }
 
-        // Simulate submission
-        status.textContent = 'Mengirim...';
-        // Here you would do fetch('/api/contact', { method:'POST', body: JSON.stringify({name,email,message}) })
-        setTimeout(()=>{
-          form.reset();
-          status.textContent = 'Terima kasih! Pesan Anda telah dikirim (simulated).';
-        }, 700);
-      });
-
-      // Smooth in-page navigation
-      document.querySelectorAll('a[href^="#"]').forEach(a=>{
-        a.addEventListener('click', (e)=>{
-          const target = document.querySelector(a.getAttribute('href'));
-          if(target){
-            e.preventDefault();
-            target.scrollIntoView({behavior:'smooth',block:'start'});
-            history.replaceState(null,'',a.getAttribute('href'));
-          }
+      function renderProducts(){
+        const list = filterAndSort();
+        productGrid.innerHTML = '';
+        resultCount.textContent = list.length;
+        list.forEach(p=>{
+          const el = document.createElement('article');
+          el.className = 'product card';
+          el.setAttribute('role','listitem');
+          el.innerHTML = `
+            <div class="img" aria-hidden></div>
+            <div class="info">
+              <div style="display:flex;justify-content:space-between;align-items:start">
+                <div>
+                  <strong>${p.name}</strong>
+                  <div class="p-muted">${p.desc}</div>
+                </div>
+                <div class="price">${fmt(p.price)}</div>
+              </div>
+              <div style="margin-top:0.6rem;display:flex;gap:0.5rem;align-items:center;justify-content:flex-end">
+                <button class="btn ghost" data-id="${p.id}" aria-label="Lihat detail ${p.name}">Detail</button>
+                <button class="btn" data-add="${p.id}">Tambah</button>
+              </div>
+            </div>
+          `;
+          // Add event listeners
+          el.querySelector('[data-add]')?.addEventListener('click', ()=>{ addToCart(p.id); });
+          el.querySelector('[data-id]')?.addEventListener('click', ()=>{ alert(p.name + " — " + fmt(p.price) + '\n\n' + p.desc); });
+          productGrid.appendChild(el);
         });
+      }
+
+      function saveCart(){
+        localStorage.setItem('cart_v1', JSON.stringify(state.cart));
+      }
+
+      function cartItemsDetailed(){
+        return Object.entries(state.cart).map(([id,qty])=>{
+          const p = products.find(x=>x.id==id);
+          return { ...p, qty: qty };
+        });
+      }
+
+      function renderCartPreview(){
+        const items = cartItemsDetailed();
+        cartPreview.innerHTML = '';
+        if(items.length===0){ cartPreview.innerHTML = '<div class="muted">Keranjang kosong</div>'; subtotalEl.textContent = fmt(0); cartCount.textContent = 0; return; }
+        items.forEach(it=>{
+          const div = document.createElement('div');
+          div.className = 'cart-item';
+          div.innerHTML = `
+            <div class="thumb" aria-hidden></div>
+            <div style="flex:1">
+              <div><strong>${it.name}</strong></div>
+              <div class="p-muted">${fmt(it.price)} x ${it.qty}</div>
+            </div>
+            <div class="price">${fmt(it.price*it.qty)}</div>
+          `;
+          cartPreview.appendChild(div);
+        });
+        const subtotal = items.reduce((s,i)=>s + i.price*i.qty,0);
+        subtotalEl.textContent = fmt(subtotal);
+        cartCount.textContent = items.reduce((s,i)=>s + i.qty,0);
+      }
+
+      function renderFullCart(){
+        const items = cartItemsDetailed();
+        fullCartItems.innerHTML = '';
+        if(items.length===0){ fullCartItems.innerHTML = '<div class="muted">Keranjang kosong</div>'; dialogSubtotal.textContent = fmt(0); dialogTotal.textContent = fmt(0); shippingEl.textContent = fmt(0); return; }
+        items.forEach(it=>{
+          const node = document.createElement('div');
+          node.style.display='flex';node.style.justifyContent='space-between';node.style.alignItems='center';
+          node.innerHTML = `
+            <div style="display:flex;gap:0.6rem;align-items:center">
+              <div class="thumb" aria-hidden></div>
+              <div>
+                <div><strong>${it.name}</strong></div>
+                <div class="p-muted">${fmt(it.price)}</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:0.6rem;align-items:center">
+              <div class="qty">
+                <button data-dec="${it.id}">-</button>
+                <div style="min-width:28px;text-align:center">${it.qty}</div>
+                <button data-inc="${it.id}">+</button>
+              </div>
+              <div style="min-width:80px;text-align:right">${fmt(it.price*it.qty)}</div>
+              <button data-rm="${it.id}" class="btn ghost">Hapus</button>
+            </div>
+          `;
+          fullCartItems.appendChild(node);
+        });
+        // attach listeners
+        fullCartItems.querySelectorAll('[data-inc]').forEach(b=>b.addEventListener('click', ()=>{ changeQty(b.getAttribute('data-inc'), 1); }));
+        fullCartItems.querySelectorAll('[data-dec]').forEach(b=>b.addEventListener('click', ()=>{ changeQty(b.getAttribute('data-dec'), -1); }));
+        fullCartItems.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click', ()=>{ removeFromCart(b.getAttribute('data-rm')); }));
+
+        const subtotal = items.reduce((s,i)=>s + i.price*i.qty,0);
+        const shipping = subtotal > 200000 ? 0 : 20000; // contoh aturan
+        dialogSubtotal.textContent = fmt(subtotal);
+        shippingEl.textContent = fmt(shipping);
+        dialogTotal.textContent = fmt(subtotal + shipping);
+      }
+
+      function addToCart(id, qty=1){
+        state.cart[id] = (state.cart[id] || 0) + qty;
+        saveCart();
+        renderCartPreview();
+      }
+      function changeQty(id, delta){
+        const cur = state.cart[id] || 0;
+        const now = cur + delta;
+        if(now <= 0) delete state.cart[id]; else state.cart[id] = now;
+        saveCart(); renderCartPreview(); renderFullCart();
+      }
+      function removeFromCart(id){ delete state.cart[id]; saveCart(); renderCartPreview(); renderFullCart(); }
+      function clearCart(){ state.cart = {}; saveCart(); renderCartPreview(); renderFullCart(); }
+
+      // Event bindings
+      document.querySelectorAll('.category').forEach(el=>el.addEventListener('click', (e)=>{
+        e.preventDefault(); document.querySelectorAll('.category').forEach(x=>x.classList.remove('active')); el.classList.add('active'); state.category = el.getAttribute('data-cat'); renderProducts();
+      }));
+
+      searchBtn.addEventListener('click', ()=>{ state.query = searchInput.value.trim(); renderProducts(); });
+      searchInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ state.query = searchInput.value.trim(); renderProducts(); } });
+      sortSelect.addEventListener('change', ()=>{ state.sort = sortSelect.value; renderProducts(); });
+      priceFilterBtn.addEventListener('click', ()=>{
+        const min = parseInt(minPriceInput.value) || null;
+        const max = parseInt(maxPriceInput.value) || null;
+        state.minPrice = min; state.maxPrice = max; renderProducts();
       });
+
+      document.body.addEventListener('click', (e)=>{
+        if(e.target.matches('[data-add]')){
+          const id = e.target.getAttribute('data-add'); addToCart(id); }
+      });
+
+      openCartBtn.addEventListener('click', ()=>{ cartDialog.showModal(); renderFullCart(); });
+      viewCartFull.addEventListener('click', ()=>{ cartDialog.showModal(); renderFullCart(); });
+      document.getElementById('closeCart').addEventListener('click', ()=>{ cartDialog.close(); });
+      clearCartBtn.addEventListener('click', ()=>{ if(confirm('Kosongkan keranjang?')) clearCart(); });
+
+      // Dialog confirm (simulate order)
+      confirmBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const name = nameField.value.trim();
+        const address = addressField.value.trim();
+        if(!name || !address){ alert('Mohon isi nama dan alamat.'); return; }
+        // Simulate processing
+        confirmBtn.disabled = true; confirmBtn.textContent = 'Memproses...';
+        setTimeout(()=>{
+          alert('Pesanan diterima! Terima kasih, ' + name + '. (Ini hanya simulasi)');
+          clearCart(); cartDialog.close(); confirmBtn.disabled = false; confirmBtn.textContent = 'Konfirmasi & Bayar (Simulasi)';
+          nameField.value = ''; addressField.value = '';
+        }, 1200);
+      });
+
+      // initial render
+      renderProducts(); renderCartPreview();
+
+      // expose for easy debugging
+      window.shopState = state;
 
     })();
   </script>
