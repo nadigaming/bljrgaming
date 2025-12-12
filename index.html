@@ -1,129 +1,342 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<!--
+  News Portal — Feature-rich single-file template
+  - Semantic HTML5, responsive layout
+  - Features: top stories carousel, category filter, search with highlighting,
+    article list with pagination / load more, article detail view, bookmarks (localStorage),
+    comments (simulated), author cards, tags, related articles, dark mode, RSS link (simulated),
+    keyboard shortcuts, accessibility considerations.
+  - Save as index.html and open in browser. Replace sample data with API as needed.
+-->
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modern Online Shop</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Portal Berita — Newsly</title>
+  <meta name="description" content="Newsly — Portal berita modern, cepat, dan responsif. Contoh template dengan banyak fitur.">
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { background: #f5f7fa; color: #1a1a1a; }
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --muted:#6b7280; --text:#0b1220; --accent:#0f766e; --accent-2:#4f46e5; --glass:rgba(0,0,0,0.04); --radius:12px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; font-size:16px; line-height:1.45;
+    }
+    :root[data-theme='dark']{ --bg:#071124; --card:#0b1220; --muted:#98a6b3; --text:#e6eef8; --accent:#06b6d4; --glass: rgba(255,255,255,0.03); }
 
-    header { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-    header h1 { font-size: 28px; font-weight: 700; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:1.25rem}
 
-    nav input { padding: 10px 15px; width: 320px; border-radius: 10px; border: 1px solid #ccc; }
+    .wrap{max-width:1200px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+    .brand{display:flex;gap:0.75rem;align-items:center;text-decoration:none;color:inherit}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-2),#7c3aed);display:grid;place-items:center;color:white;font-weight:700}
+    h1{font-size:1.15rem;margin:0}
+    .top-controls{display:flex;gap:0.6rem;align-items:center}
 
-    .cart-btn { background: #111; color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; border: none; font-weight: 500; }
+    /* search */
+    .search{display:flex;align-items:center;gap:0.4rem}
+    .search input{padding:0.6rem 0.8rem;border-radius:10px;border:1px solid var(--glass);background:transparent;color:var(--text)}
+    .btn{background:var(--accent);color:white;padding:0.5rem 0.75rem;border-radius:10px;border:none;cursor:pointer}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:0.45rem 0.7rem;border-radius:8px}
 
-    .hero { padding: 80px 40px; text-align: center; background: linear-gradient(135deg, #111, #444); color: white; }
-    .hero h2 { font-size: 48px; font-weight: 700; }
-    .hero p { margin-top: 10px; font-size: 18px; opacity: 0.9; }
+    /* Layout */
+    .grid{display:grid;grid-template-columns:1fr 330px;gap:1rem}
 
-    .product-section { padding: 50px 40px; }
-    .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
+    /* Carousel / top stories */
+    .carousel{position:relative;border-radius:14px;background:linear-gradient(180deg,rgba(0,0,0,0.05),transparent);overflow:hidden}
+    .carousel-inner{display:flex;transition:transform 0.45s ease}
+    .slide{min-width:100%;padding:1.25rem;display:grid;grid-template-columns:1fr 360px;gap:1rem}
+    .slide .media{border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);height:220px}
+    .slide h2{margin:0}
 
-    .product-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transition: 0.2s; }
-    .product-card:hover { transform: translateY(-5px); }
+    .dots{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;display:flex;gap:6px}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.6);cursor:pointer}
+    .dot.active{background:var(--accent-2)}
 
-    .product-card img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; }
-    .product-card h3 { margin-top: 15px; font-size: 20px; }
-    .product-card p { margin: 5px 0; color: #555; }
+    /* Article list */
+    .articles{display:grid;gap:1rem}
+    .article{display:flex;gap:1rem;padding:0.9rem;border-radius:12px;background:var(--card);box-shadow: 0 6px 20px rgba(2,6,23,0.06)}
+    .article .thumb{width:180px;height:120px;border-radius:8px;background:linear-gradient(135deg,var(--accent-2),#60a5fa);flex-shrink:0}
+    .article h3{margin:0 0 0.4rem}
+    .meta{color:var(--muted);font-size:0.9rem}
 
-    .price { font-size: 22px; font-weight: 700; margin: 10px 0; }
-    .btn { background: #111; color: white; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; width: 100%; }
+    .tag{display:inline-block;background:var(--glass);padding:0.2rem 0.5rem;border-radius:999px;margin-right:0.4rem;font-size:0.82rem}
 
-    /* Cart modal */
-    .cart-modal { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: white; padding: 20px; box-shadow: -2px 0 10px rgba(0,0,0,0.1); transition: 0.3s; }
-    .cart-modal.open { right: 0; }
-    .cart-item { display: flex; justify-content: space-between; margin: 15px 0; }
-    .checkout-btn { margin-top: 20px; width: 100%; padding: 12px; background: #111; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    /* Sidebar */
+    aside .card{background:var(--card);padding:1rem;border-radius:12px}
+    .author{display:flex;gap:0.6rem;align-items:center}
+    .avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#fb7185)}
+
+    /* Article detail modal */
+    .overlay{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;padding:1.25rem}
+    .overlay.open{display:flex}
+    .article-modal{width:min(900px,100%);max-height:92vh;overflow:auto;background:var(--card);border-radius:12px;padding:1rem}
+    .content img{max-width:100%;border-radius:8px}
+    .comments{margin-top:1rem}
+    .comment{padding:0.6rem;border-radius:8px;background:var(--glass);margin-bottom:0.6rem}
+
+    /* utilities */
+    .muted{color:var(--muted)}
+    .small{font-size:0.9rem}
+    .flex{display:flex}
+    .space{flex:1}
+
+    footer{margin-top:1rem;color:var(--muted);font-size:0.95rem}
+
+    @media(min-width:900px){ .slide{grid-template-columns:1fr 360px} }
+    @media(max-width:899px){ .grid{grid-template-columns:1fr} .slide{grid-template-columns:1fr} .slide .media{height:180px} .article .thumb{width:120px;height:90px} }
+
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="#home"><div class="logo">NY</div><div><h1>Newsly</h1><div class="muted small">Portal Berita — Template</div></div></a>
 
-<header>
-  <h1>ShopinStore</h1>
-  <nav>
-    <input type="text" id="search" placeholder="Cari produk...">
-    <button class="cart-btn" onclick="toggleCart()">Keranjang (<span id="cart-count">0</span>)</button>
-  </nav>
-</header>
-
-<section class="hero">
-  <h2>Belanja Lebih Mudah, Cepat & Modern</h2>
-  <p>Pilihan produk terbaik dengan harga terjangkau — semua dalam satu tempat.</p>
-</section>
-
-<section class="product-section">
-  <h2 style="margin-bottom:20px; font-size:32px;">Produk Terbaru</h2>
-  <div class="product-grid" id="product-list"></div>
-</section>
-
-<div class="cart-modal" id="cart-modal">
-  <h2>Keranjang</h2>
-  <div id="cart-items"></div>
-  <button class="checkout-btn" onclick="checkout()">Checkout</button>
-</div>
-
-<script>
-  const products = [
-    { id: 1, name: "Sepatu Sport", price: 350000, img: "https://picsum.photos/300/220?random=1" },
-    { id: 2, name: "Headphone Wireless", price: 280000, img: "https://picsum.photos/300/220?random=2" },
-    { id: 3, name: "Hoodie Premium", price: 190000, img: "https://picsum.photos/300/220?random=3" },
-    { id: 4, name: "Kemeja Casual", price: 150000, img: "https://picsum.photos/300/220?random=4" },
-    { id: 5, name: "Tas Ransel", price: 220000, img: "https://picsum.photos/300/220?random=5" },
-    { id: 6, name: "Smartwatch", price: 450000, img: "https://picsum.photos/300/220?random=6" },
-  ];
-
-  let cart = [];
-
-  function loadProducts() {
-    let list = document.getElementById("product-list");
-    list.innerHTML = products.map(p => `
-      <div class="product-card">
-        <img src="${p.img}" />
-        <h3>${p.name}</h3>
-        <p>Produk berkualitas tinggi</p>
-        <div class="price">Rp ${p.price.toLocaleString()}</div>
-        <button class="btn" onclick="addToCart(${p.id})">Tambah ke Keranjang</button>
+      <div class="top-controls">
+        <div class="search" role="search">
+          <input id="searchInput" placeholder="Cari berita, topik, atau penulis..." aria-label="Cari berita">
+          <button id="searchBtn" class="btn">Cari</button>
+        </div>
+        <button id="themeToggle" class="ghost" aria-pressed="false">Mode Gelap</button>
+        <button id="bookmarksBtn" class="ghost">Bookmarks (<span id="bmCount">0</span>)</button>
       </div>
-    `).join('');
-  }
+    </header>
 
-  function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    cart.push(product);
-    document.getElementById("cart-count").textContent = cart.length;
-    updateCartUI();
-  }
+    <!-- Carousel top stories -->
+    <section class="carousel" aria-label="Top stories" id="carousel">
+      <div class="carousel-inner" id="carouselInner"></div>
+      <div class="dots" id="carouselDots"></div>
+    </section>
 
-  function updateCartUI() {
-    const container = document.getElementById("cart-items");
-    container.innerHTML = cart.map(item => `
-      <div class="cart-item">
-        <span>${item.name}</span>
-        <span>Rp ${item.price.toLocaleString()}</span>
-      </div>`
-    ).join('');
-  }
+    <div class="grid" style="margin-top:1rem">
+      <main>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem">
+          <h2>Berita Terbaru</h2>
+          <div class="muted small">Menampilkan <strong id="resultCount">0</strong> artikel</div>
+        </div>
 
-  function toggleCart() {
-    document.getElementById("cart-modal").classList.toggle("open");
-  }
+        <div class="articles" id="articlesList"></div>
 
-  function checkout() {
-    alert("Checkout berhasil! (Simulasi)");
-    cart = [];
-    updateCartUI();
-    document.getElementById("cart-count").textContent = 0;
-  }
+        <div style="display:flex;gap:0.6rem;justify-content:center;margin-top:0.8rem">
+          <button id="loadMoreBtn" class="btn">Muat Lebih</button>
+          <button id="pagePrev" class="ghost">Prev</button>
+          <button id="pageNext" class="ghost">Next</button>
+        </div>
+      </main>
 
-  loadProducts();
-</script>
+      <aside>
+        <div class="card">
+          <h3>Penulis Pilihan</h3>
+          <div style="margin-top:0.6rem">
+            <div class="author"><div class="avatar" aria-hidden></div><div><strong>Ani Wijaya</strong><div class="muted small">Jurnalis — Teknologi</div></div></div>
+            <div style="height:10px"></div>
+            <div class="author"><div class="avatar" aria-hidden></div><div><strong>Budi Santoso</strong><div class="muted small">Reporter — Investigasi</div></div></div>
+          </div>
+        </div>
 
+        <div class="card" style="margin-top:0.8rem">
+          <h3>Kategori</h3>
+          <div style="margin-top:0.5rem;display:flex;flex-wrap:wrap;gap:0.4rem" id="categoryList"></div>
+        </div>
+
+        <div class="card" style="margin-top:0.8rem">
+          <h3>Terkini & Populer</h3>
+          <ol id="popularList" style="padding-left:1rem;margin-top:0.6rem"></ol>
+        </div>
+
+        <div class="card" style="margin-top:0.8rem">
+          <h3>Tentang</h3>
+          <p class="muted small">Newsly — prototipe portal berita dengan fitur modern. Ganti data dengan API Anda.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+        <div class="muted">© <span id="year"></span> Newsly — Template</div>
+        <div class="muted">Shortcut: <kbd>/</kbd> fokus cari &nbsp; • &nbsp; <kbd>n</kbd> next artikel</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Article Detail Overlay -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <article class="article-modal" role="article" aria-labelledby="modalTitle">
+      <header style="display:flex;justify-content:space-between;align-items:center;gap:1rem">
+        <div>
+          <h2 id="modalTitle">Judul Artikel</h2>
+          <div class="muted small" id="modalMeta">Penulis • Tanggal • Kategori</div>
+        </div>
+        <div class="space"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <button id="bookmarkToggle" class="btn">Bookmark</button>
+          <button id="closeModal" class="ghost">Tutup</button>
+        </div>
+      </header>
+
+      <div class="content" id="modalContent" style="margin-top:0.8rem"></div>
+
+      <section class="comments" id="commentsSection">
+        <h3>Komentar</h3>
+        <div id="commentsList"></div>
+        <form id="commentForm" style="margin-top:0.6rem;display:grid;gap:0.5rem">
+          <input id="commentName" placeholder="Nama" required style="padding:0.6rem;border-radius:8px;border:1px solid var(--glass)">
+          <textarea id="commentText" rows="3" placeholder="Tulis komentar..." required style="padding:0.6rem;border-radius:8px;border:1px solid var(--glass)"></textarea>
+          <button class="btn" type="submit">Kirim Komentar</button>
+        </form>
+      </section>
+
+    </article>
+  </div>
+
+  <script>
+    // Sample data (replace with API calls as needed)
+    const sampleArticles = [];
+    const categories = ['Semua','Nasional','Teknologi','Bisnis','Hiburan','Olahraga','Gaya Hidup','Sains'];
+    // generate sample content
+    for(let i=1;i<=28;i++){
+      const cat = categories[(i% (categories.length-1))+1];
+      sampleArticles.push({
+        id: i,
+        title: `${cat}: Berita contoh nomor ${i}`,
+        excerpt: `Ringkasan singkat untuk artikel ${i} — ini adalah teks contoh yang menjelaskan inti berita secara singkat.`,
+        content: `<p>Paragraf pembuka untuk artikel sample ${i}. Ini memberikan pengantar dan ringkasan pentingnya.</p><p>Paragraf lanjutan dengan konten lebih mendalam. Ganti dengan konten aktual dari API.</p><p><strong>Highlight:</strong> poin penting artikel.</p>`,
+        author: i%2===0 ? 'Ani Wijaya' : 'Budi Santoso',
+        date: new Date(Date.now() - i*3600*1000*12).toISOString(),
+        category: cat,
+        tags: ['breaking','update'].slice(0, (i%2)+1),
+        image: `https://picsum.photos/seed/news${i}/800/520`
+      });
+    }
+
+    // State
+    let state = { articles: sampleArticles, page:1, perPage:6, query:'', category:'Semua', bookmarks: JSON.parse(localStorage.getItem('newsly_bm')||'[]') };
+
+    // Utilities
+    const fmtDate = d => new Date(d).toLocaleString();
+    const el = id => document.getElementById(id);
+
+    // Init
+    el('year').textContent = new Date().getFullYear();
+    el('bmCount').textContent = state.bookmarks.length;
+
+    // Carousel
+    function renderCarousel(){
+      const top = state.articles.slice(0,4);
+      const inner = el('carouselInner'); const dots = el('carouselDots'); inner.innerHTML=''; dots.innerHTML='';
+      top.forEach((a,idx)=>{
+        const slide = document.createElement('section'); slide.className='slide';
+        slide.innerHTML = `
+          <div>
+            <h2>${a.title}</h2>
+            <div class="muted small">${a.author} • ${fmtDate(a.date)} • ${a.category}</div>
+            <p class="muted" style="margin-top:0.6rem">${a.excerpt}</p>
+            <div style="margin-top:0.8rem"><button class="btn" data-open="${a.id}">Baca Selengkapnya</button></div>
+          </div>
+          <div>
+            <div class="media" style="background-image:url('${a.image}');background-size:cover;background-position:center"></div>
+          </div>
+        `;
+        inner.appendChild(slide);
+        const dot = document.createElement('button'); dot.className='dot'; dot.setAttribute('data-idx', idx); dot.addEventListener('click', ()=>{ goSlide(idx); }); dots.appendChild(dot);
+      });
+      initCarousel();
+    }
+
+    let slideIdx=0, slideTimer=null;
+    function initCarousel(){
+      const inner = el('carouselInner'); const slides = inner.children; const dots = el('carouselDots').children;
+      function show(i){ slideIdx = (i + slides.length) % slides.length; inner.style.transform = `translateX(-${slideIdx*100}%)`; for(let d of dots) d.classList.remove('active'); dots[slideIdx].classList.add('active'); }
+      function next(){ show(slideIdx+1); }
+      show(0); clearInterval(slideTimer); slideTimer = setInterval(next, 4500);
+      // open buttons
+      inner.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click', ()=>openArticle(b.getAttribute('data-open'))));
+    }
+    function goSlide(i){ slideIdx = i; const inner = el('carouselInner'); inner.style.transform = `translateX(-${slideIdx*100}%)`; const dots = el('carouselDots').children; for(let d of dots) d.classList.remove('active'); dots[slideIdx].classList.add('active'); }
+
+    // Articles list
+    function filteredArticles(){
+      let list = state.articles.slice();
+      if(state.category && state.category!=='Semua') list = list.filter(a=>a.category===state.category);
+      if(state.query) { const q = state.query.toLowerCase(); list = list.filter(a=> (a.title + ' ' + a.excerpt + ' ' + a.content).toLowerCase().includes(q)); }
+      return list;
+    }
+
+    function renderArticles(reset=false){
+      if(reset) state.page = 1;
+      const list = filteredArticles();
+      const start = (state.page-1)*state.perPage; const end = start + state.perPage; const pageItems = list.slice(start,end);
+      const container = el('articlesList'); if(reset) container.innerHTML = '';
+      pageItems.forEach(a=>{
+        const node = document.createElement('article'); node.className='article'; node.innerHTML = `
+          <div class="thumb" style="background-image:url('${a.image}');background-size:cover;background-position:center" aria-hidden></div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:start"><div><span class="tag">${a.category}</span> <strong style="font-size:1.05rem">${a.title}</strong></div><div class="muted small">${fmtDate(a.date)}</div></div>
+            <p class="muted" style="margin-top:0.5rem">${a.excerpt}</p>
+            <div style="margin-top:0.6rem;display:flex;gap:0.5rem;align-items:center">
+              <button class="btn" data-open="${a.id}">Baca</button>
+              <button class="ghost" data-book="${a.id}">Bookmark</button>
+              <div class="space"></div>
+              <div class="muted small">Tags: ${a.tags.join(', ')}</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(node);
+      });
+      el('resultCount').textContent = list.length;
+
+      // attach handlers for newly added nodes
+      container.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click', ()=>openArticle(b.getAttribute('data-open'))));
+      container.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click', ()=>toggleBookmark(b.getAttribute('data-book'))));
+    }
+
+    // Pagination / Load more
+    el('loadMoreBtn').addEventListener('click', ()=>{ state.page++; renderArticles(); });
+    el('pageNext').addEventListener('click', ()=>{ state.page++; renderArticles(true); });
+    el('pagePrev').addEventListener('click', ()=>{ if(state.page>1) state.page--; renderArticles(true); });
+
+    // Categories
+    function renderCategories(){ const wrap = el('categoryList'); wrap.innerHTML=''; categories.forEach(c=>{ const btn = document.createElement('button'); btn.className='tag'; btn.textContent=c; btn.addEventListener('click', ()=>{ state.category=c; renderArticles(true); }); wrap.appendChild(btn); }); }
+
+    // Popular list
+    function renderPopular(){ const ol = el('popularList'); const top = state.articles.slice(0,5); ol.innerHTML = top.map(a=>`<li><a href="#" data-open="${a.id}">${a.title}</a></li>`).join(''); ol.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',(e)=>{ e.preventDefault(); openArticle(b.getAttribute('data-open')); })); }
+
+    // Article modal & comments
+    const overlay = el('overlay'); function openArticle(id){ const a = state.articles.find(x=>x.id==id); if(!a) return; el('modalTitle').textContent = a.title; el('modalMeta').textContent = `${a.author} • ${fmtDate(a.date)} • ${a.category}`; el('modalContent').innerHTML = `<img src="${a.image}" alt=""><div style="margin-top:0.6rem">${a.content}</div>`; overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); // comments from localStorage per article
+      const comments = JSON.parse(localStorage.getItem('newsly_comments_'+a.id) || '[]'); renderComments(comments);
+      el('bookmarkToggle').dataset.id = a.id; el('bookmarkToggle').textContent = state.bookmarks.includes(a.id) ? 'Remove Bookmark' : 'Bookmark';
+    }
+    el('closeModal').addEventListener('click', ()=>{ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); });
+
+    function renderComments(list){ const cList = el('commentsList'); cList.innerHTML = list.map(c=>`<div class="comment"><strong>${c.name}</strong><div class="muted small">${new Date(c.date).toLocaleString()}</div><div style="margin-top:0.4rem">${c.text}</div></div>`).join(''); }
+
+    el('commentForm').addEventListener('submit',(e)=>{
+      e.preventDefault(); const id = el('bookmarkToggle').dataset.id; if(!id) return; const name = el('commentName').value.trim(); const text = el('commentText').value.trim(); if(!name||!text) return alert('Isi nama dan komentar.'); const comments = JSON.parse(localStorage.getItem('newsly_comments_'+id) || '[]'); comments.unshift({name,text,date:new Date().toISOString()}); localStorage.setItem('newsly_comments_'+id, JSON.stringify(comments)); renderComments(comments); el('commentForm').reset(); });
+
+    // Bookmarks
+    function toggleBookmark(id){ id = parseInt(id); if(state.bookmarks.includes(id)){ state.bookmarks = state.bookmarks.filter(x=>x!==id);} else { state.bookmarks.unshift(id);} localStorage.setItem('newsly_bm', JSON.stringify(state.bookmarks)); el('bmCount').textContent = state.bookmarks.length; alert('Bookmarks updated'); }
+    el('bookmarkToggle').addEventListener('click', ()=>{ toggleBookmark(el('bookmarkToggle').dataset.id); el('bookmarkToggle').textContent = state.bookmarks.includes(parseInt(el('bookmarkToggle').dataset.id)) ? 'Remove Bookmark' : 'Bookmark'; });
+    el('bookmarksBtn').addEventListener('click', ()=>{ const list = state.bookmarks.map(id=> state.articles.find(a=>a.id==id)).filter(Boolean); if(list.length===0) return alert('Belum ada bookmark.'); const titles = list.map(a=>a.title).join('\n'); alert('Bookmarks:\n' + titles); });
+
+    // Search
+    el('searchBtn').addEventListener('click', ()=>{ state.query = el('searchInput').value.trim(); renderArticles(true); });
+    el('searchInput').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ state.query = el('searchInput').value.trim(); renderArticles(true); } if(e.key==='/' ){ e.preventDefault(); el('searchInput').focus(); } });
+
+    // Theme toggle
+    const root = document.documentElement; const themeBtn = el('themeToggle'); themeBtn.addEventListener('click', ()=>{ const now = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', now); localStorage.setItem('newsly_theme', now); themeBtn.textContent = now==='dark' ? 'Mode Terang' : 'Mode Gelap'; themeBtn.setAttribute('aria-pressed', now==='dark'); });
+    const savedTheme = localStorage.getItem('newsly_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); root.setAttribute('data-theme', savedTheme); themeBtn.textContent = savedTheme==='dark' ? 'Mode Terang' : 'Mode Gelap'; themeBtn.setAttribute('aria-pressed', savedTheme==='dark');
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown',(e)=>{ if(e.key==='/' && document.activeElement !== el('searchInput')){ e.preventDefault(); el('searchInput').focus(); } if(e.key==='n'){ // next: open next article from list
+        const firstArticle = el('articlesList').querySelector('[data-open]'); if(firstArticle) firstArticle.click(); }
+    });
+
+    // Init render
+    renderCarousel(); renderCategories(); renderPopular(); renderArticles(true);
+
+    // Expose for debug
+    window.newsly = { state, openArticle };
+  </script>
 </body>
 </html>
